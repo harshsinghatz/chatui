@@ -9,6 +9,7 @@ import {
 import { Button, Container, LeftContainer, RightContainer } from "./styles";
 import Modal from "./components/Modal";
 import APIInforForm from "./components/APIInfoForm";
+import { getLocalStorageItem } from "./utils/localstorage";
 
 function App() {
   const [theme, setTheme] = useState("light");
@@ -35,6 +36,8 @@ function App() {
     },
   ]);
 
+  const conversations = getLocalStorageItem("conversations");
+
   return (
     <ThemeProvider theme={getIsLightMode() ? lightTheme : darkTheme}>
       <GlobalStyles />
@@ -45,7 +48,7 @@ function App() {
           </Button>
           <Button onClick={() => setModalOpen(true)}>Set API Data</Button>
           <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
-            <APIInforForm />
+            <APIInforForm closeModal={() => setModalOpen(false)} />
           </Modal>
           <div
             style={{
@@ -57,7 +60,10 @@ function App() {
             onDrag={(e) => handleDrag(e)}
           />{" "}
         </LeftContainer>
-        <RightContainer rightWidth={rightWidth}></RightContainer>
+        <RightContainer rightWidth={rightWidth}>
+          {conversations?.role}
+          {conversations?.content}
+        </RightContainer>
       </Container>
     </ThemeProvider>
   );

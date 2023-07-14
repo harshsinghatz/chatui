@@ -1,8 +1,15 @@
 import styled from "styled-components";
 import { Button } from "../styles";
-import { useState } from "react";
-import { getLocalStorageItem } from "../utils/localstorage";
-import { LOCAL_KEY_NAME, LOCAL_MODEL_NAME } from "../utils/openai";
+import { useEffect, useState } from "react";
+import {
+  getLocalStorageItem,
+  updateLocalStorageItem,
+} from "../utils/localstorage";
+import {
+  LOCAL_KEY_NAME,
+  LOCAL_MODEL_NAME,
+  getConversations,
+} from "../utils/openai";
 
 // Define the styled components
 const FormContainer = styled.form`
@@ -32,14 +39,26 @@ const OptionSelector = styled.select`
 `;
 
 // Component
-const APIInforForm = () => {
+const APIInforForm = ({ closeModal }) => {
   const [apiData, setAPIData] = useState({
-    key: getLocalStorageItem(LOCAL_KEY_NAME),
-    model: getLocalStorageItem(LOCAL_MODEL_NAME),
+    key: "",
+    model: "",
   });
+
+  useEffect(() => {
+    setAPIData({
+      key: getLocalStorageItem(LOCAL_KEY_NAME) || "",
+      model: getLocalStorageItem(LOCAL_MODEL_NAME) || "",
+    });
+  }, []);
 
   const handleFormSubmit = (e: SubmitEvent) => {
     e.preventDefault();
+
+    updateLocalStorageItem(LOCAL_KEY_NAME, apiData.key);
+
+    updateLocalStorageItem(LOCAL_MODEL_NAME, apiData.model);
+    closeModal();
   };
 
   return (
@@ -54,13 +73,18 @@ const APIInforForm = () => {
       </FieldContainer>
       <FieldContainer>
         <Label>GPT Model:</Label>
-        <OptionSelector>
+        <OptionSelector
+          onChange={(e) => setAPIData({ ...apiData, model: e.target.value })}
+          value={apiData.model}
+        >
           <option value="">Select the model</option>
-          <option value="option1">GPT-4</option>
-          <option value="option2">GPT-3.5</option>
+          {/* <option value="gpt-4">GPT-4</option> */}
+          <option value="gpt-3.5-turbo">GPT-3.5</option>
         </OptionSelector>
       </FieldContainer>
-      <Button type="submit">Set Data</Button>
+      <Button type="submit" disabled={!(apiData.key && apiData.model)}>
+        Set Data
+      </Button>
     </FormContainer>
   );
 };

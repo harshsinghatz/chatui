@@ -18,11 +18,7 @@ export const getLocalStorageItem = (key: string) => {
 
 export const updateLocalStorageItem = (key: string, value: any) => {
   try {
-    const existingItem = getLocalStorageItem(key);
-    if (existingItem) {
-      const updatedItem = { ...existingItem, ...value };
-      setLocalStorageItem(key, updatedItem);
-    }
+    setLocalStorageItem(key, value);
   } catch (error) {
     console.error("Error updating item in local storage:", error);
   }
