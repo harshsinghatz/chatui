@@ -1,45 +1,22 @@
-import styled from "styled-components";
-import { Button } from "../styles";
+import {
+  Button,
+  FieldContainer,
+  FormContainer,
+  Label,
+  OptionSelector,
+  TextInput,
+} from "../styles";
 import { useEffect, useState } from "react";
 import {
   getLocalStorageItem,
   updateLocalStorageItem,
 } from "../utils/localstorage";
-import {
-  LOCAL_KEY_NAME,
-  LOCAL_MODEL_NAME,
-  getConversations,
-} from "../utils/openai";
+import { LOCAL_KEY_NAME, LOCAL_MODEL_NAME } from "../utils/openai";
 
-// Define the styled components
-const FormContainer = styled.form`
-  display: flex;
-  flex-direction: column;
-`;
-
-const FieldContainer = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-`;
-
-const Label = styled.label`
-  margin-right: 10px;
-  text-align: right;
-`;
-
-const TextInput = styled.input`
-  padding: 5px;
-  border: 1px solid #ccc;
-`;
-
-const OptionSelector = styled.select`
-  padding: 5px;
-  border: 1px solid #ccc;
-`;
-
-// Component
-const APIInforForm = ({ closeModal }) => {
+interface APIInforFormProps {
+  closeModal: () => void;
+}
+const APIInforForm = ({ closeModal }: APIInforFormProps) => {
   const [apiData, setAPIData] = useState({
     key: "",
     model: "",
@@ -47,12 +24,12 @@ const APIInforForm = ({ closeModal }) => {
 
   useEffect(() => {
     setAPIData({
-      key: getLocalStorageItem(LOCAL_KEY_NAME) || "",
-      model: getLocalStorageItem(LOCAL_MODEL_NAME) || "",
+      key: getLocalStorageItem<string>(LOCAL_KEY_NAME) || "",
+      model: getLocalStorageItem<string>(LOCAL_MODEL_NAME) || "",
     });
   }, []);
 
-  const handleFormSubmit = (e: SubmitEvent) => {
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     updateLocalStorageItem(LOCAL_KEY_NAME, apiData.key);

@@ -1,8 +1,9 @@
-import { OpenAIApi, Configuration } from "openai";
+import { OpenAIApi, Configuration, ChatCompletionRequestMessage } from "openai";
 import { getLocalStorageItem, updateLocalStorageItem } from "./localstorage";
 
 export const LOCAL_KEY_NAME = "API_KEY";
 export const LOCAL_MODEL_NAME = "MODEL_NAME";
+export const LOCAL_CONVERSATIONS_KEY = "conversations";
 
 const apiKey = getLocalStorageItem(LOCAL_KEY_NAME) as string;
 
@@ -14,28 +15,55 @@ const config = new Configuration({
 
 const openai = new OpenAIApi(config);
 
-export const getConversations = async () => {
+export const getConversations = async ({ value }: { value: string }) => {
   try {
-    console.log(apiKey, modelName);
+    let prevValue = getLocalStorageItem(
+      LOCAL_CONVERSATIONS_KEY
+    ) as ChatCompletionRequestMessage[];
+
+    updateLocalStorageItem(LOCAL_CONVERSATIONS_KEY, [
+      ...(<[]>(prevValue || [])),
+      {
+        role: "user",
+        content: value,
+      },
+    ]);
+
+    const localConversations = getLocalStorageItem(LOCAL_CONVERSATIONS_KEY);
+
+    if (!localConversations) return;
 
     const chatCompletion = await openai.createChatCompletion({
       model: modelName,
-      messages: [{ role: "user", content: "Hello world" }],
+      messages: localConversations as ChatCompletionRequestMessage[],
     });
 
-    console.log(chatCompletion.data.choices[0].message);
+    const message = {
+      ...chatCompletion.data.choices[0].message,
+    };
 
-    updateLocalStorageItem(
-      "conversations",
-      chatCompletion.data.choices[0].message
-    );
-    return chatCompletion.data.choices[0].message;
+    prevValue = getLocalStorageItem(
+      LOCAL_CONVERSATIONS_KEY
+    ) as ChatCompletionRequestMessage[];
+
+    const newValue = Array.isArray(prevValue) ? [...prevValue, message] : [];
+
+    const uniqueContent = new Set();
+
+    const filteredArray = newValue.filter((element) => {
+      if (uniqueContent.has(element.content)) {
+        return false;
+      }
+
+      uniqueContent.add(element.content);
+      return true;
+    });
+
+    console.log(prevValue);
+    updateLocalStorageItem(LOCAL_CONVERSATIONS_KEY, filteredArray);
+
+    return filteredArray;
   } catch (err) {
-    if (err.response) {
-      console.log(err.response.status);
-      console.log(err.response.data);
-    } else {
-      console.log(err.message);
-    }
+    console.error(err);
   }
 };

@@ -6,10 +6,10 @@ export const setLocalStorageItem = (key: string, value: any) => {
   }
 };
 
-export const getLocalStorageItem = (key: string) => {
+export const getLocalStorageItem = <T>(key: string): T | null => {
   try {
     const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : null;
+    return item ? (JSON.parse(item) as T) : null;
   } catch (error) {
     console.error("Error retrieving item from local storage:", error);
     return null;
